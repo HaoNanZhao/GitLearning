@@ -1,0 +1,110 @@
+[TOC]
+## Git版本控制系统
+> 版本控制系统：
+> 1.记录历史版本信息（记录每一次修改的记录）
+> 2.方便团队相互之间协作开发
+> ......
+> 常用的版本控制系统
+> * cvs / svn : 集中式版本控制系统
+> * Git : 分布式版本控制系统
+>* [x]  Linux作者linus写的Git
+
+#### SVN 集中式
+必须有一个中央总控的服务器用以存储历史版本和代码信息
+
+```mermaid
+graph LR
+A[本地userA] -->|A代码提交| B(中央服务器)
+B --> C[产生不同历史版本]
+C-->|可以回滚到|A
+C-->|获取A的代码|D[本地usrB]
+D-->|上传代码|B
+```
+每天的第一件事情，把最新代码拉到本地。完成一天的工作后，上传前先拉取，如果有冲突，以一定方式比如手动修改解决完冲突然后再提交。
+> 弊端：
+> * 需要联网才能回退或者查看历史版本信息
+> * 万一中央服务器毁坏了，一切OVER
+> * 所有的上传和下载都是基于文件传输方式完成的，速度会很慢
+
+#### Git分布式
+```mermaid
+graph LR
+A[UserA本地项目仓库] -->A1(工作区)
+A-->A2(暂存区)
+A-->A3(历史区)
+A3-->|某个历史版本回退到工作区|A1
+A3-->|推送|C
+C{中央服务器.GitHUb}
+B[UserB本地项目仓库]-->B3(历史区)
+B3-->|推送|C
+C-->|拉取|B3
+C-->|拉取|A3
+```
+> 优点：
+> * 当一个人开发的时候，本地就可以当作仓库，无需联网
+> * 向中央仓库传输内容时传输内容依托的是文件流传输，速度比SVN快
+
+
+### Git安装
+**安装过程中有一个选项**
+>* [ ]  Use Git from Git Bash only  只能在Git bash中用Git命令
+>* [ ]  Use Git from the Windows Command Prompt 可以在windows命令行下使用
+>![bf7e79557fe5db26affbbc6e723d01e0.png](en-resource://database/2912:1)
+
+### Git工作原理
+* 工作区 ： 写代码的
+* 暂存区 ： 临时存储（暂时不想提交到历史版本的）
+* 历史区 ： 生成历史版本
+#### 1.Git的全局配置
+> 第一次安装完成后，我们在全局环境下配置基本信息：我是谁？要告诉他
+`$ git config -l 查看配置信息`
+`$ git config --global -l   查看全局配置信息 `
+![d054b64a56156406ae37a12ef56b064f.png](en-resource://database/2914:1)
+在本地已经告诉他是谁才行。
+
+**怎么告诉他**
+`$ git config --global user.name 'xxx'`
+`$ git config --global user.email 'xxx.com'`
+
+#### 2.创建仓库完成版本控制
+##### 2.1创建本地Git仓库
+> `$ git init`
+> **会生成一个隐藏文件夹 ”.git“(千万不能删，因为暂存区和历史区还有一些其他信息都在这里，删了就不是一个完整的git仓库)**
+![124ac811fe40a0e22defce81e17090cb.png](en-resource://database/2916:0)
+
+##### 2.2文件提交到暂存区 add 撤销 rm --cached
+> `$ git add xxx 把某一个文件或者文件夹提交到暂存区`
+> `$ git add . 包含修改和新增的，但不包括删除的`
+> `$ git add -u 包含修改和删除的，但不包括新增的`
+> `$ git add -A 所有的`
+> `$ git status 查看当前文件的状态`**红色代表在工作区，绿色代表在缓存区，看不见的东西证明所有修改的信息都已经提交到历史区**。
+![0dc57a4fa0d7ae0deb6a510f4f6b0a1b.png](en-resource://database/2918:0)
+刚刚新建的readme.txt文件（注意不要用win自带txt的编辑器）红色表示当前还在**工作区**。
+![efed36348d8c887112f27a41800fcd4c.png](en-resource://database/2920:0)
+add提交结束后，已经到暂存区了（绿色）。
+注意使用了我git status后，命令窗口会提示信息，用什么命令进行什么操作。
+**撤销readme文件提交到暂存区的命令：**
+`$ git rm --cached readme`
+![6f4875b2e246e7870870162926a0926d.png](en-resource://database/2922:0)
+
+##### 提交到历史区
+>**提交到历史区**
+> `$ git commit -m'描述信息：本次提交的一个描述'`
+> **查看版本信息（历史记录）**
+> `$git log`
+> **查看回滚信息
+> `$git reflog`
+> ![de6602500e9a5686d79c9f2f4f43ac1f.png](en-resource://database/2924:0)
+> **命令窗口分别提示版本号、提交信息、几个文件改变、改变了几行内容**
+> **注意：必须要先提交到暂存区才能提交到历史区**
+> ![f3dcc16b9a019f5cecba8f1967275ca7.png](en-resource://database/2926:0)
+
+
+```mermaid
+graph LR
+A[工作区] --> |git add xxx|B(暂存区)
+B --> |git commit -m''|C[历史区]
+B-->|git rm --cached xxx|A
+C-->A
+```
+**从工作区提交到暂存区，从暂存区提交到历史区：是把内同复制一份提交过去的，本区中仍有这些信息，只有这样才能方便回滚，确定哪些文件在某个区。**
